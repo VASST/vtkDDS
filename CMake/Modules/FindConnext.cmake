@@ -38,24 +38,24 @@
 #
 ###############################################################################
 
-set(_Connext_hints
+set(_connext_hints
   "C:/Program Files/rti_connext_dds-6.0.1"
   )
 
 if(UNIX)
-  list(APPEND _Connext_hints
-    /home/$ENV{USER}/rti_connext_dds-6.0.1
+  list(APPEND _connext_hints
+    "/home/$ENV{USER}/rti_connext_dds-6.0.1"
   )
 endif()
 
 if(NDDSHOME)
-  list(APPEND _Connext_hints
+  list(APPEND _connext_hints
     ${NDDSHOME}
     )
 endif()
 
 if($ENV{NDDSHOME})
-  list(APPEND _Connext_hints
+  list(APPEND _connext_hints
     $ENV{NDDSHOME}
     )
 endif()
@@ -76,7 +76,6 @@ if(MSVC)
   else()
     set(_lib_prefix "i86Win32")
   endif()
-
 elseif(UNIX AND NOT APPLE)
   set(_lib_compiler "gcc5.4.0")
   if(CMAKE_SIZEOF_VOID_P EQUAL 8)
@@ -122,22 +121,41 @@ foreach(_lib ${_expected_libs})
   if(NDDSSTATIC)
     set(_lib ${_lib}z)
   endif()
-message(${_lib})
-unset(_lib_file_release CACHE)
+
+  unset(_lib_file_release CACHE)
 
   find_library(_lib_file_release
     ${_lib}${CMAKE_STATIC_LIBRARY_SUFFIX}
     PATHS
-      ${_Connext_hints}
+      ${_connext_hints}
     PATH_SUFFIXES
       lib/${_lib_folder}
     )
-    message(${_lib_file_release})
+
+  if(_lib_file_release)
+    list(APPEND _found_libs_release ${_lib_file_release})
+  endif()
+
+  # Look for debug version
+  unset(_lib_file_debug CACHE)
+
+  find_library(_lib_file_debug
+    ${_lib}d${CMAKE_STATIC_LIBRARY_SUFFIX}
+    PATHS
+      ${_connext_hints}
+    PATH_SUFFIXES
+      lib/${_lib_folder}
+    )
+
+  if(_lib_file_debug)
+    list(APPEND _found_libs_debug ${_lib_file_debug})
+  endif()
+
+  # Retrieve base path
+  # Create target
 endforeach()
 
 include(FindPackageHandleStandardArgs)
-# Connext_HOME, Connext_ARCHITECTURE_NAME, Connext_LIBRARY_DIRS, and
-# Connext_LIBRARY_DIR are not always set, depending on the source of Connext.
 find_package_handle_standard_args(Connext
   FOUND_VAR Connext_FOUND
   REQUIRED_VARS
