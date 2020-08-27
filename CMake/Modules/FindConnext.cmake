@@ -242,7 +242,7 @@ if(Connext_HOME)
 
   if(EXISTS ${Connext_HOME}/bin/rtiddsgen${_suffix})
     # confirm that the script is runnable
-    execute_process(COMMAND "${Connext_HOME}/bin/rtiddsgen${_suffix}" "-n_version"
+    execute_process(COMMAND "${Connext_HOME}/bin/rtiddsgen${_suffix}" "-version"
       RESULT_VARIABLE 
         _results
       OUTPUT_QUIET 
