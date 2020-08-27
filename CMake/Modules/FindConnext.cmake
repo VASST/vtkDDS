@@ -1,4 +1,4 @@
-# Copyright 2014-2015 Open Source Robotics Foundation, Inc.
+# Copyright 2020 Adam Rankin
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,31 +12,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-###############################################################################
+#-----------------------------------------------------------------------
 #
-# CMake module for finding RTI Connext.
+# Inputs:
 #
-# Input variables:
+# - NDDSHOME: root directory for Connext installation
+# - NDDSSTATIC: Whether to link against static libs
 #
-# - NDDSHOME (optional): When specified, header files and libraries
-#   will be searched for in `${NDDSHOME}/include`, `${NDDSHOME}/include/ndds`
-#   and `${NDDSHOME}/lib` respectively.
-# - NDDSSTATIC (optional): Whether to link against static libs
+# Outputs:
 #
-# Output variables:
-#
-# - Connext_FOUND: flag indicating if the package was found
+# - Connext_FOUND: flag indicating if the package was found.
 # - Connext_HOME: Root directory for the NDDS install.
-# - Connext_LIBRARIES: List of targets produced by this Find module
-# - Connext_DDSGEN: Path to the idl2code generator
-# - Connext_DDSGEN_SERVER: Path to the idl2code generator in server mode
+# - Connext_TARGETS: List of available targets found by this module.
+# - Connext_DDSGEN: Location of the DDSGEN script.
 #
-# Example usage:
+# Usage:
 #
 #   find_package(Connext MODULE)
-#   target_link_libraries(<target> RTI::
+#   target_link_libraries(<target> rti::<lib>)
 #
-###############################################################################
+#-----------------------------------------------------------------------
 
 set(_connext_hints
   "C:/Program Files/rti_connext_dds-6.0.1"
@@ -118,11 +113,11 @@ set(_expected_libs
 )
 
 foreach(_lib ${_expected_libs})
+  set(_lib_type SHARED)
   if(NDDSSTATIC)
     set(_lib ${_lib}z)
+    set(_lib_type STATIC)
   endif()
-
-  unset(_lib_file_release CACHE)
 
   find_library(_lib_file_release
     ${_lib}${CMAKE_STATIC_LIBRARY_SUFFIX}
@@ -132,13 +127,7 @@ foreach(_lib ${_expected_libs})
       lib/${_lib_folder}
     )
 
-  if(_lib_file_release)
-    list(APPEND _found_libs_release ${_lib_file_release})
-  endif()
-
   # Look for debug version
-  unset(_lib_file_debug CACHE)
-
   find_library(_lib_file_debug
     ${_lib}d${CMAKE_STATIC_LIBRARY_SUFFIX}
     PATHS
@@ -147,20 +136,132 @@ foreach(_lib ${_expected_libs})
       lib/${_lib_folder}
     )
 
-  if(_lib_file_debug)
-    list(APPEND _found_libs_debug ${_lib_file_debug})
+  if(_lib_file_release)
+    # Confirm the DLL is there
+    if(WIN32 AND NOT NDDSSTATIC)
+      string(REPLACE ".lib" ".dll" _dll_file_release ${_lib_file_release})
+      if(NOT EXISTS ${_dll_file_release})
+        message(FATAL_ERROR "Release shared library requested but dll cannot be found for library ${_lib}.")
+      endif()
+    endif()
+
+    # Retrieve base path
+    get_filename_component(_ver_dir ${_lib_file_release} DIRECTORY)
+    get_filename_component(_lib_dir ${_ver_dir} DIRECTORY)
+    get_filename_component(Connext_HOME ${_lib_dir} DIRECTORY)
+
+    # Create target
+    add_library(rti::${_lib} ${_lib_type} IMPORTED)
+    if(WIN32)
+      if(NOT NDDSSTATIC)
+        set_target_properties(rti::${_lib} PROPERTIES
+          IMPORTED_IMPLIB_RELEASE ${_lib_file_release}
+          )
+        set_target_properties(rti::${_lib} PROPERTIES
+          IMPORTED_LOCATION_RELEASE ${_dll_file_release}
+          )
+      else()
+        set_target_properties(rti::${_lib} PROPERTIES
+          IMPORTED_LOCATION_RELEASE ${_lib_file_release}
+          )
+      endif()
+      set(_defs RTI_WIN32)
+      if(NOT NDDSSTATIC)
+        list(APPEND _defs NDDS_DLL_VARIABLE)
+      endif()
+      set_property(TARGET rti::${_lib} PROPERTY
+        INTERFACE_COMPILE_DEFINITIONS
+          ${_defs}
+          )
+    else()
+      set_target_properties(rti::${_lib} PROPERTIES
+        IMPORTED_LOCATION_RELEASE ${_lib_file_release}
+        )
+      set_property(TARGET rti::${_lib} PROPERTY
+        INTERFACE_COMPILE_DEFINITIONS
+          RTI_UNIX
+          )
+      set(_dep_libs dl)
+      if(NOT ANDROID)
+        list(APPEND _dep_libs pthread)
+      endif()
+      set_property(TARGET rti::${_lib} PROPERTY
+        INTERFACE_LINK_LIBRARIES
+          ${_dep_libs}
+        )
+    endif()
+    set_property(TARGET rti::${_lib} PROPERTY
+      INTERFACE_INCLUDE_DIRECTORIES 
+        ${Connext_HOME}/include
+        ${Connext_HOME}/include/ndds
+        ${Connext_HOME}/include/ndds/hpp
+      )
+
+    # Add debug details if present
+    if(_lib_file_debug)
+      if(WIN32)
+        if(NOT NDDSSTATIC)
+          string(REPLACE ".lib" ".dll" _dll_file_debug ${_lib_file_debug})
+          if(NOT EXISTS ${_dll_file_debug})
+            message(FATAL_ERROR "Debug shared library requested but dll cannot be found for library ${_lib}.")
+          endif()
+          set_target_properties(rti::${_lib} PROPERTIES
+            IMPORTED_IMPLIB_DEBUG ${_lib_file_debug}
+            )
+          set_target_properties(rti::${_lib} PROPERTIES
+            IMPORTED_LOCATION_DEBUG ${_dll_file_debug}
+            )
+        else()
+          set_target_properties(rti::${_lib} PROPERTIES
+            IMPORTED_LOCATION_DEBUG ${_lib_file_debug}
+            )
+        endif()
+      else()
+        set_target_properties(rti::${_lib} PROPERTIES
+          IMPORTED_LOCATION_DEBUG ${_lib_file_debug}
+          )
+      endif()
+    endif()
+
+    list(APPEND Connext_TARGETS rti::${_lib})
   endif()
 
-  # Retrieve base path
-  # Create target
+  unset(_lib_file_debug CACHE)
+  unset(_lib_file_release CACHE)
 endforeach()
+
+if(Connext_HOME)
+  set(Connext_HOME ${Connext_HOME} CACHE FILEPATH "The root location found for RTI Connext SDK")
+  mark_as_advanced(Connext_HOME)
+  
+  # Attempt to find ddsgen (ability to convert IDL files to XML)
+  set(_suffix "")
+  if(WIN32)
+    set(_suffix ".bat")
+  endif()
+
+  if(EXISTS ${Connext_HOME}/bin/rtiddsgen${_suffix})
+    # confirm that the script is runnable
+    execute_process(COMMAND "${Connext_HOME}/bin/rtiddsgen${_suffix}" "-n_version"
+      RESULT_VARIABLE 
+        _results
+      OUTPUT_QUIET 
+      ERROR_QUIET
+      )
+    if(NOT _results EQUAL 0)
+      message("FindConnext: Unable to run ddsgen script. IDL processing may not be possible.")
+    endif()
+
+    set(Connext_DDSGEN ${Connext_HOME}/bin/rtiddsgen${_suffix} CACHE FILEPATH "Path to the DDSGEN script")
+    mark_as_advanced(Connext_DDSGEN)
+  endif()
+endif()
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(Connext
   FOUND_VAR Connext_FOUND
   REQUIRED_VARS
-    Connext_INCLUDE_DIRS
-    Connext_LIBRARIES
-    Connext_DEFINITIONS
+    Connext_HOME
     Connext_DDSGEN
+    Connext_TARGETS
 )
