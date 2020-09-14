@@ -42,6 +42,7 @@ OTHER DEALINGS IN THE SOFTWARE.
 #include <image_16bps.hpp>
 #include <image_32bps.hpp>
 
+/*
 unsigned int process_data(dds::sub::DataReader<VtkImage8bit>& reader)
 {
   // Take all samples.  Samples are loaned to application, loan is
@@ -100,6 +101,7 @@ void run_example(unsigned int domain_id, unsigned int sample_count)
     waitset.dispatch(dds::core::Duration(4));  // Wait up to 4s each time
   }
 }
+*/
 
 //----------------------------------------------------------------------------
 vtkImageSubscriber::vtkImageSubscriber()
@@ -107,6 +109,12 @@ vtkImageSubscriber::vtkImageSubscriber()
   , Subscriber(Participant)
   , CurrentBitsPerPixel(BitsPerPixel_8Bit)
   , TopicName("VtkImageDDS")
+  , Topic8Bit(Participant, "VtkImage8Bit")
+  , Topic16Bit(Participant, "VtkImage16Bit")
+  , Topic32Bit(Participant, "VtkImage32Bit")
+  , Reader8Bit(Subscriber, Topic8Bit)
+  , Reader16Bit(Subscriber, Topic16Bit)
+  , Reader32Bit(Subscriber, Topic32Bit)
 {
 
 }
@@ -133,16 +141,16 @@ void vtkImageSubscriber::SetBitsPerPixel(BitsPerPixel bpp)
   switch (this->CurrentBitsPerPixel)
   {
   case BitsPerPixel_8Bit:
-    this->Topic8bit = dds::topic::Topic<VtkImage8bit>(this->Participant, this->TopicName);
-    this->Reader8bit = dds::sub::DataReader<VtkImage8bit>(this->Subscriber, this->Topic8Bit);
+    this->Topic8Bit = dds::topic::Topic<VtkImage8bit>(this->Participant, this->TopicName);
+    this->Reader8Bit = dds::sub::DataReader<VtkImage8bit>(this->Subscriber, this->Topic8Bit);
     break;
   case BitsPerPixel_16Bit:
     this->Topic16Bit = dds::topic::Topic<VtkImage16bit>(this->Participant, this->TopicName);
-    this->Reader16bit = dds::sub::DataReader<VtkImage16bit>(this->Subscriber, this->Topic16Bit);
+    this->Reader16Bit = dds::sub::DataReader<VtkImage16bit>(this->Subscriber, this->Topic16Bit);
     break;
   case BitsPerPixel_32Bit:
-    this->Topic32Bit = dds::topic::Topic<VtkImage32Bit>(this->Participant, this->TopicName);
-    this->Reader32bit = dds::sub::DataReader<VtkImage32Bit>(this->Subscriber, this->Topic32Bit);
+    this->Topic32Bit = dds::topic::Topic<VtkImage32bit>(this->Participant, this->TopicName);
+    this->Reader32Bit = dds::sub::DataReader<VtkImage32bit>(this->Subscriber, this->Topic32Bit);
     break;
   default:
     break;

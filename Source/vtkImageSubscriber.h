@@ -40,6 +40,10 @@ enum BitsPerPixel
   BitsPerPixel_32Bit
 };
 
+class VtkImage8bit;
+class VtkImage16bit;
+class VtkImage32bit;
+
 class vtkImageSubscriber : public vtkObject
 {
 public:
@@ -61,7 +65,7 @@ protected:
   BitsPerPixel CurrentBitsPerPixel;
   std::string TopicName;
 
-  dds::topic::Topic<VtkImage8bit> Topic8bit;
+  dds::topic::Topic<VtkImage8bit> Topic8Bit;
   dds::sub::DataReader<VtkImage8bit> Reader8Bit;
   dds::topic::Topic<VtkImage16bit> Topic16Bit;
   dds::sub::DataReader<VtkImage16bit> Reader16Bit;
