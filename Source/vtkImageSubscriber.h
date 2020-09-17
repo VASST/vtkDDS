@@ -33,16 +33,7 @@ OTHER DEALINGS IN THE SOFTWARE.
 #include <dds/sub/Subscriber.hpp>
 #include <dds/topic/Topic.hpp>
 
-enum BitsPerPixel
-{
-  BitsPerPixel_8Bit,
-  BitsPerPixel_16Bit,
-  BitsPerPixel_32Bit
-};
-
-class VtkImage8bit;
-class VtkImage16bit;
-class VtkImage32bit;
+class VtkImage;
 
 class vtkImageSubscriber : public vtkObject
 {
@@ -53,23 +44,19 @@ public:
   void SetDomainId(unsigned int);
   vtkGetMacro(DomainId, unsigned int);
 
-  void SetBitsPerPixel(BitsPerPixel);
-
   void SetTopicName(std::string);
   vtkGetMacro(TopicName, std::string);
+
+protected:
+  uint32_t ProcessData(dds::sub::DataReader<VtkImage>& reader);
 
 protected:
   dds::domain::DomainParticipant Participant;
   dds::sub::Subscriber Subscriber;
   unsigned int DomainId;
-  BitsPerPixel CurrentBitsPerPixel;
   std::string TopicName;
 
-  dds::topic::Topic<VtkImage8bit> Topic8Bit;
-  dds::sub::DataReader<VtkImage8bit> Reader8Bit;
-  dds::topic::Topic<VtkImage16bit> Topic16Bit;
-  dds::sub::DataReader<VtkImage16bit> Reader16Bit;
-  dds::topic::Topic<VtkImage32bit> Topic32Bit;
-  dds::sub::DataReader<VtkImage32bit> Reader32Bit;
+  dds::topic::Topic<VtkImage> Topic;
+  dds::sub::DataReader<VtkImage> Reader;
 private:
 };

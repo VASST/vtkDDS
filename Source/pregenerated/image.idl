@@ -23,10 +23,18 @@ OTHER DEALINGS IN THE SOFTWARE.
 
 ********************************************/
 
-/* Image, 16 bits per scalar */
-struct VtkImage16bit {
-  unsigned long Width;
-  unsigned long Height;
-  unsigned long ScalarComponents;
-  sequence<unsigned short> ImageBytes;
+typedef uint32 Dimension_t;
+typedef uint8 Components_t;
+typedef uint64 Timestamp_t;
+
+@extensibility(APPENDABLE)
+struct VtkImage {
+  @key
+  Timestamp_t Timestamp;
+  Dimension_t Width;
+  Dimension_t Height;
+  @default(1)
+  Dimension_t Depth;
+  Components_t Components;
+  sequence<uint8> Data;
 };

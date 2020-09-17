@@ -38,40 +38,9 @@ OTHER DEALINGS IN THE SOFTWARE.
 #include <vtkObject.h>
 
 // Topic includes
-#include <image_8bps.hpp>
-#include <image_16bps.hpp>
-#include <image_32bps.hpp>
+#include "image.hpp"
 
 /*
-unsigned int process_data(dds::sub::DataReader<VtkImage8bit>& reader)
-{
-  // Take all samples.  Samples are loaned to application, loan is
-  // returned when LoanedSamples destructor called.
-  unsigned int samples_read = 0;
-  dds::sub::LoanedSamples<VtkImage8bit> samples = reader.take();
-  for (const auto& sample : samples)
-  {
-    if (sample.info().valid())
-    {
-      samples_read++;
-      std::cout << sample.data() << std::endl;
-    }
-  }
-
-  return samples_read;
-}
-
-void run_example(unsigned int domain_id, unsigned int sample_count)
-{
-  // A Topic has a name and a datatype. Create a Topic named
-  // "HelloWorld Topic" with type HelloWorld
-  dds::topic::Topic<VtkImage8bit> topic(participant, "Example HelloWorld");
-
-  // This DataReader will read data of type HelloWorld on Topic
-  // "HelloWorld Topic". DataReader QoS is configured in
-  // USER_QOS_PROFILES.xml
-  dds::sub::DataReader<VtkImage8bit> reader(subscriber, topic);
-
   // Obtain the DataReader's Status Condition
   dds::core::cond::StatusCondition status_condition(reader);
 
@@ -107,14 +76,9 @@ void run_example(unsigned int domain_id, unsigned int sample_count)
 vtkImageSubscriber::vtkImageSubscriber()
   : Participant(0)
   , Subscriber(Participant)
-  , CurrentBitsPerPixel(BitsPerPixel_8Bit)
   , TopicName("VtkImageDDS")
-  , Topic8Bit(Participant, "VtkImage8Bit")
-  , Topic16Bit(Participant, "VtkImage16Bit")
-  , Topic32Bit(Participant, "VtkImage32Bit")
-  , Reader8Bit(Subscriber, Topic8Bit)
-  , Reader16Bit(Subscriber, Topic16Bit)
-  , Reader32Bit(Subscriber, Topic32Bit)
+  , Topic(Participant, "VtkImage")
+  , Reader(Subscriber, Topic)
 {
 
 }
@@ -131,34 +95,29 @@ void vtkImageSubscriber::SetDomainId(unsigned int domainId)
   this->DomainId = domainId;
   this->Participant = dds::domain::DomainParticipant(this->DomainId);
   this->Subscriber = dds::sub::Subscriber(this->Participant);
-  this->SetBitsPerPixel(this->CurrentBitsPerPixel);
 }
 
 //----------------------------------------------------------------------------
-void vtkImageSubscriber::SetBitsPerPixel(BitsPerPixel bpp)
+void vtkImageSubscriber::SetTopicName(std::string topicName)
 {
-  this->CurrentBitsPerPixel = bpp;
-  switch (this->CurrentBitsPerPixel)
+  this->Topic = dds::topic::Topic<VtkImage>(this->Participant, topicName);
+  this->Reader = dds::sub::DataReader<VtkImage>(this->Subscriber, this->Topic);
+}
+
+//----------------------------------------------------------------------------
+uint32_t ProcessData(dds::sub::DataReader<VtkImage>& reader)
+{
+  // Take all samples.  Samples are loaned to application, loan is returned when LoanedSamples destructor called.
+  unsigned int samples_read = 0;
+  dds::sub::LoanedSamples<VtkImage> samples = reader.take();
+  for (const auto& sample : samples)
   {
-  case BitsPerPixel_8Bit:
-    this->Topic8Bit = dds::topic::Topic<VtkImage8bit>(this->Participant, this->TopicName);
-    this->Reader8Bit = dds::sub::DataReader<VtkImage8bit>(this->Subscriber, this->Topic8Bit);
-    break;
-  case BitsPerPixel_16Bit:
-    this->Topic16Bit = dds::topic::Topic<VtkImage16bit>(this->Participant, this->TopicName);
-    this->Reader16Bit = dds::sub::DataReader<VtkImage16bit>(this->Subscriber, this->Topic16Bit);
-    break;
-  case BitsPerPixel_32Bit:
-    this->Topic32Bit = dds::topic::Topic<VtkImage32bit>(this->Participant, this->TopicName);
-    this->Reader32Bit = dds::sub::DataReader<VtkImage32bit>(this->Subscriber, this->Topic32Bit);
-    break;
-  default:
-    break;
+    if (sample.info().valid())
+    {
+      samples_read++;
+      // Image received, throw it into queue and fire an event
+    }
   }
-}
 
-//----------------------------------------------------------------------------
-void vtkImageSubscriber::SetTopicName(std::string)
-{
-
+  return samples_read;
 }

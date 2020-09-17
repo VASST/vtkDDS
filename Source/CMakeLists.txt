@@ -6,12 +6,8 @@ set(vtkDDS_HEADERS
   )
 
 set(vtkDDS_PREGENERATED
-  pregenerated/image_8bps.hpp
-  pregenerated/image_8bps.cxx
-  pregenerated/image_16bps.hpp
-  pregenerated/image_16bps.cxx
-  pregenerated/image_32bps.hpp
-  pregenerated/image_32bps.cxx
+  pregenerated/image.hpp
+  pregenerated/image.cxx
   )
 
 set(vtkDDS_SOURCES

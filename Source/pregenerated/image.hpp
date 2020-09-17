@@ -3,14 +3,14 @@
 /*
 WARNING: THIS FILE IS AUTO-GENERATED. DO NOT MODIFY.
 
-This file was generated from image_16bps.idl using "rtiddsgen".
+This file was generated from image.idl using "rtiddsgen".
 The rtiddsgen tool is part of the RTI Connext distribution.
 For more information, type 'rtiddsgen -help' at a command shell
 or consult the RTI Connext manual.
 */
 
-#ifndef image_16bps_877472984_hpp
-#define image_16bps_877472984_hpp
+#ifndef image_879297079_hpp
+#define image_879297079_hpp
 
 #include <iosfwd>
 
@@ -56,33 +56,56 @@ or consult the RTI Connext manual.
 #define NDDSUSERDllExport __declspec(dllexport)
 #endif
 
+typedef uint32_t Dimension_t;
+struct Dimension_t_AliasTag_t {};
+
+typedef uint8_t Components_t;
+struct Components_t_AliasTag_t {};
+
+typedef ::rti::core::uint64 Timestamp_t;
+struct Timestamp_t_AliasTag_t {};
+
 #if (defined(RTI_WIN32) || defined (RTI_WINCE)) && defined(NDDS_USER_DLL_EXPORT)
 // On Windows, dll-export template instantiations of standard types used by
 // other dll-exported types
-template class NDDSUSERDllExport std::allocator< uint16_t >;
-template class NDDSUSERDllExport std::vector< uint16_t >;
+template class NDDSUSERDllExport std::allocator< uint8_t >;
+template class NDDSUSERDllExport std::vector< uint8_t >;
 #endif
-class NDDSUSERDllExport VtkImage16bit {
+class NDDSUSERDllExport VtkImage {
   public:
-    VtkImage16bit();
+    VtkImage();
 
-    VtkImage16bit(
+    VtkImage(
+        ::rti::core::uint64 Timestamp,
         uint32_t Width,
         uint32_t Height,
-        uint32_t ScalarComponents,
-        const std::vector< uint16_t >& ImageBytes);
+        uint32_t Depth,
+        uint8_t Components,
+        const std::vector< uint8_t >& Data);
 
     #ifdef RTI_CXX11_RVALUE_REFERENCES
     #ifndef RTI_CXX11_NO_IMPLICIT_MOVE_OPERATIONS
-    VtkImage16bit (VtkImage16bit&&) = default;
-    VtkImage16bit& operator=(VtkImage16bit&&) = default;
-    VtkImage16bit& operator=(const VtkImage16bit&) = default;
-    VtkImage16bit(const VtkImage16bit&) = default;
+    VtkImage (VtkImage&&) = default;
+    VtkImage& operator=(VtkImage&&) = default;
+    VtkImage& operator=(const VtkImage&) = default;
+    VtkImage(const VtkImage&) = default;
     #else
-    VtkImage16bit(VtkImage16bit&& other_) OMG_NOEXCEPT;  
-    VtkImage16bit& operator=(VtkImage16bit&&  other_) OMG_NOEXCEPT;
+    VtkImage(VtkImage&& other_) OMG_NOEXCEPT;  
+    VtkImage& operator=(VtkImage&&  other_) OMG_NOEXCEPT;
     #endif
     #endif 
+
+    ::rti::core::uint64& Timestamp() OMG_NOEXCEPT {
+        return m_Timestamp_;
+    }
+
+    const ::rti::core::uint64& Timestamp() const OMG_NOEXCEPT {
+        return m_Timestamp_;
+    }
+
+    void Timestamp(::rti::core::uint64 value) {
+        m_Timestamp_ = value;
+    }
 
     uint32_t& Width() OMG_NOEXCEPT {
         return m_Width_;
@@ -108,50 +131,64 @@ class NDDSUSERDllExport VtkImage16bit {
         m_Height_ = value;
     }
 
-    uint32_t& ScalarComponents() OMG_NOEXCEPT {
-        return m_ScalarComponents_;
+    uint32_t& Depth() OMG_NOEXCEPT {
+        return m_Depth_;
     }
 
-    const uint32_t& ScalarComponents() const OMG_NOEXCEPT {
-        return m_ScalarComponents_;
+    const uint32_t& Depth() const OMG_NOEXCEPT {
+        return m_Depth_;
     }
 
-    void ScalarComponents(uint32_t value) {
-        m_ScalarComponents_ = value;
+    void Depth(uint32_t value) {
+        m_Depth_ = value;
     }
 
-    std::vector< uint16_t >& ImageBytes() OMG_NOEXCEPT {
-        return m_ImageBytes_;
+    uint8_t& Components() OMG_NOEXCEPT {
+        return m_Components_;
     }
 
-    const std::vector< uint16_t >& ImageBytes() const OMG_NOEXCEPT {
-        return m_ImageBytes_;
+    const uint8_t& Components() const OMG_NOEXCEPT {
+        return m_Components_;
     }
 
-    void ImageBytes(const std::vector< uint16_t >& value) {
-        m_ImageBytes_ = value;
+    void Components(uint8_t value) {
+        m_Components_ = value;
     }
 
-    bool operator == (const VtkImage16bit& other_) const;
-    bool operator != (const VtkImage16bit& other_) const;
+    std::vector< uint8_t >& Data() OMG_NOEXCEPT {
+        return m_Data_;
+    }
 
-    void swap(VtkImage16bit& other_) OMG_NOEXCEPT ;
+    const std::vector< uint8_t >& Data() const OMG_NOEXCEPT {
+        return m_Data_;
+    }
+
+    void Data(const std::vector< uint8_t >& value) {
+        m_Data_ = value;
+    }
+
+    bool operator == (const VtkImage& other_) const;
+    bool operator != (const VtkImage& other_) const;
+
+    void swap(VtkImage& other_) OMG_NOEXCEPT ;
 
   private:
 
+    ::rti::core::uint64 m_Timestamp_;
     uint32_t m_Width_;
     uint32_t m_Height_;
-    uint32_t m_ScalarComponents_;
-    std::vector< uint16_t > m_ImageBytes_;
+    uint32_t m_Depth_;
+    uint8_t m_Components_;
+    std::vector< uint8_t > m_Data_;
 
 };
 
-inline void swap(VtkImage16bit& a, VtkImage16bit& b)  OMG_NOEXCEPT 
+inline void swap(VtkImage& a, VtkImage& b)  OMG_NOEXCEPT 
 {
     a.swap(b);
 }
 
-NDDSUSERDllExport std::ostream& operator<<(std::ostream& o, const VtkImage16bit& sample);
+NDDSUSERDllExport std::ostream& operator<<(std::ostream& o, const VtkImage& sample);
 
 namespace rti {
     namespace flat {
@@ -163,17 +200,17 @@ namespace dds {
     namespace topic {
 
         template<>
-        struct topic_type_name< VtkImage16bit > {
+        struct topic_type_name< VtkImage > {
             NDDSUSERDllExport static std::string value() {
-                return "VtkImage16bit";
+                return "VtkImage";
             }
         };
 
         template<>
-        struct is_topic_type< VtkImage16bit > : public ::dds::core::true_type {};
+        struct is_topic_type< VtkImage > : public ::dds::core::true_type {};
 
         template<>
-        struct topic_type_support< VtkImage16bit > {
+        struct topic_type_support< VtkImage > {
             NDDSUSERDllExport 
             static void register_type(
                 ::dds::domain::DomainParticipant& participant,
@@ -182,17 +219,17 @@ namespace dds {
             NDDSUSERDllExport 
             static std::vector<char>& to_cdr_buffer(
                 std::vector<char>& buffer, 
-                const VtkImage16bit& sample,
+                const VtkImage& sample,
                 ::dds::core::policy::DataRepresentationId representation 
                 = ::dds::core::policy::DataRepresentation::auto_id());
 
             NDDSUSERDllExport 
-            static void from_cdr_buffer(VtkImage16bit& sample, const std::vector<char>& buffer);
+            static void from_cdr_buffer(VtkImage& sample, const std::vector<char>& buffer);
             NDDSUSERDllExport 
-            static void reset_sample(VtkImage16bit& sample);
+            static void reset_sample(VtkImage& sample);
 
             NDDSUSERDllExport 
-            static void allocate_sample(VtkImage16bit& sample, int, int);
+            static void allocate_sample(VtkImage& sample, int, int);
 
             static const ::rti::topic::TypePluginKind::type type_plugin_kind = 
             ::rti::topic::TypePluginKind::STL;
@@ -205,14 +242,38 @@ namespace rti {
     namespace topic {
         #ifndef NDDS_STANDALONE_TYPE
         template<>
-        struct dynamic_type< VtkImage16bit > {
+        struct dynamic_type< Dimension_t_AliasTag_t > {
+            typedef ::dds::core::xtypes::AliasType type;
+            NDDSUSERDllExport static const ::dds::core::xtypes::AliasType& get();
+        };
+        #endif
+
+        #ifndef NDDS_STANDALONE_TYPE
+        template<>
+        struct dynamic_type< Components_t_AliasTag_t > {
+            typedef ::dds::core::xtypes::AliasType type;
+            NDDSUSERDllExport static const ::dds::core::xtypes::AliasType& get();
+        };
+        #endif
+
+        #ifndef NDDS_STANDALONE_TYPE
+        template<>
+        struct dynamic_type< Timestamp_t_AliasTag_t > {
+            typedef ::dds::core::xtypes::AliasType type;
+            NDDSUSERDllExport static const ::dds::core::xtypes::AliasType& get();
+        };
+        #endif
+
+        #ifndef NDDS_STANDALONE_TYPE
+        template<>
+        struct dynamic_type< VtkImage > {
             typedef ::dds::core::xtypes::StructType type;
             NDDSUSERDllExport static const ::dds::core::xtypes::StructType& get();
         };
         #endif
 
         template <>
-        struct extensibility< VtkImage16bit > {
+        struct extensibility< VtkImage > {
             static const ::dds::core::xtypes::ExtensibilityKind::type kind =
             ::dds::core::xtypes::ExtensibilityKind::EXTENSIBLE;                
         };
@@ -227,5 +288,5 @@ namespace rti {
 #define NDDSUSERDllExport
 #endif
 
-#endif // image_16bps_877472984_hpp
+#endif // image_879297079_hpp
 
