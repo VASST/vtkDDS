@@ -30,10 +30,12 @@ OTHER DEALINGS IN THE SOFTWARE.
 #include <vtkSmartPointer.h>
 
 // RTI includes
+#include <dds/core/cond/StatusCondition.hpp>
 #include <dds/domain/DomainParticipant.hpp>
 #include <dds/sub/DataReader.hpp>
 #include <dds/sub/Subscriber.hpp>
 #include <dds/topic/Topic.hpp>
+#include <rti/core/cond/AsyncWaitSet.hpp>
 
 // Export directive
 #include "vtkDDSExport.h"
@@ -52,7 +54,7 @@ public:
   };
 
 public:
-  vtkImageSubscriber();
+  vtkImageSubscriber(uint32_t threadPoolSize = 2);
   virtual ~vtkImageSubscriber();
 
   void SetDomainId(unsigned int);
@@ -65,7 +67,7 @@ public:
   vtkSmartPointer<vtkImageData> GetLatestImage();
 
 protected:
-  uint32_t ProcessData(dds::sub::DataReader<VtkImage>& reader);
+  uint32_t ProcessData();
 
   class QueueEntry
   {
@@ -82,6 +84,7 @@ protected:
   dds::domain::DomainParticipant            Participant;
   dds::sub::Subscriber                      Subscriber;
   dds::core::cond::StatusCondition          StatusCondition;
+  rti::core::cond::AsyncWaitSet             WaitSetAsync;
   unsigned int                              DomainId;
   std::string                               TopicName;
 
