@@ -4,13 +4,15 @@
       <typedef name="Dimension_t" type="uint32"/>
       <typedef name="Components_t" type="uint8"/>
       <typedef name="Timestamp_t" type="uint64"/>
+      <typedef name="Bitness_t" type="uint8"/>
       <struct name="VtkImage" extensibility="appendable">
         <member name="Timestamp" type="nonBasic" nonBasicTypeName="Timestamp_t" key="true"/>
         <member name="Width" type="nonBasic" nonBasicTypeName="Dimension_t"/>
         <member name="Height" type="nonBasic" nonBasicTypeName="Dimension_t"/>
         <member name="Depth" type="nonBasic" nonBasicTypeName="Dimension_t" default="1"/>
         <member name="Components" type="nonBasic" nonBasicTypeName="Components_t"/>
-        <member name="Data" type="uint8"/>
+        <member name="Data" type="uint8" sequenceMaxLength="-1"/>
+        <member name="BytesPerComponent" type="nonBasic" nonBasicTypeName="Bitness_t"/>
       </struct>
     </types>
 

@@ -26,6 +26,7 @@ OTHER DEALINGS IN THE SOFTWARE.
 typedef uint32 Dimension_t;
 typedef uint8 Components_t;
 typedef uint64 Timestamp_t;
+typedef uint8 Bitness_t;
 
 @extensibility(APPENDABLE)
 struct VtkImage {
@@ -37,4 +38,5 @@ struct VtkImage {
   Dimension_t Depth;
   Components_t Components;
   sequence<uint8> Data;
+  Bitness_t BytesPerComponent;
 };

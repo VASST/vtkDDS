@@ -9,8 +9,8 @@ For more information, type 'rtiddsgen -help' at a command shell
 or consult the RTI Connext manual.
 */
 
-#ifndef imagePlugin_879297079_h
-#define imagePlugin_879297079_h
+#ifndef imagePlugin_879297137_h
+#define imagePlugin_879297137_h
 
 #include "image.hpp"
 
@@ -285,6 +285,92 @@ Timestamp_tPlugin_get_serialized_key_max_size_for_keyhash(
     RTIEncapsulationId encapsulation_id,
     unsigned int current_alignment);
 
+#define Bitness_tPlugin_get_sample PRESTypePluginDefaultEndpointData_getSample
+
+#define Bitness_tPlugin_get_buffer PRESTypePluginDefaultEndpointData_getBuffer 
+#define Bitness_tPlugin_return_buffer PRESTypePluginDefaultEndpointData_returnBuffer
+
+#define Bitness_tPlugin_create_sample PRESTypePluginDefaultEndpointData_createSample 
+#define Bitness_tPlugin_destroy_sample PRESTypePluginDefaultEndpointData_deleteSample 
+
+/* --------------------------------------------------------------------------------------
+Support functions:
+* -------------------------------------------------------------------------------------- */
+
+NDDSUSERDllExport extern Bitness_t*
+Bitness_tPluginSupport_create_data_w_params(
+    const struct DDS_TypeAllocationParams_t * alloc_params);
+
+NDDSUSERDllExport extern Bitness_t*
+Bitness_tPluginSupport_create_data_ex(RTIBool allocate_pointers);
+
+NDDSUSERDllExport extern Bitness_t*
+Bitness_tPluginSupport_create_data(void);
+
+NDDSUSERDllExport extern RTIBool 
+Bitness_tPluginSupport_copy_data(
+    Bitness_t *out,
+    const Bitness_t *in);
+
+NDDSUSERDllExport extern void 
+Bitness_tPluginSupport_destroy_data_w_params(
+    Bitness_t *sample,
+    const struct DDS_TypeDeallocationParams_t * dealloc_params);
+
+NDDSUSERDllExport extern void 
+Bitness_tPluginSupport_destroy_data_ex(
+    Bitness_t *sample,RTIBool deallocate_pointers);
+
+NDDSUSERDllExport extern void 
+Bitness_tPluginSupport_destroy_data(
+    Bitness_t *sample);
+
+NDDSUSERDllExport extern void 
+Bitness_tPluginSupport_print_data(
+    const Bitness_t *sample,
+    const char *desc,
+    unsigned int indent);
+
+/* ----------------------------------------------------------------------------
+Callback functions:
+* ---------------------------------------------------------------------------- */
+
+NDDSUSERDllExport extern RTIBool 
+Bitness_tPlugin_copy_sample(
+    PRESTypePluginEndpointData endpoint_data,
+    Bitness_t *out,
+    const Bitness_t *in);
+
+/* ----------------------------------------------------------------------------
+(De)Serialize functions:
+* ------------------------------------------------------------------------- */
+
+NDDSUSERDllExport extern unsigned int 
+Bitness_tPlugin_get_serialized_sample_max_size(
+    PRESTypePluginEndpointData endpoint_data,
+    RTIBool include_encapsulation,
+    RTIEncapsulationId encapsulation_id,
+    unsigned int current_alignment);
+
+/* --------------------------------------------------------------------------------------
+Key Management functions:
+* -------------------------------------------------------------------------------------- */
+NDDSUSERDllExport extern PRESTypePluginKeyKind 
+Bitness_tPlugin_get_key_kind(void);
+
+NDDSUSERDllExport extern unsigned int 
+Bitness_tPlugin_get_serialized_key_max_size(
+    PRESTypePluginEndpointData endpoint_data,
+    RTIBool include_encapsulation,
+    RTIEncapsulationId encapsulation_id,
+    unsigned int current_alignment);
+
+NDDSUSERDllExport extern unsigned int 
+Bitness_tPlugin_get_serialized_key_max_size_for_keyhash(
+    PRESTypePluginEndpointData endpoint_data,
+    RTIEncapsulationId encapsulation_id,
+    unsigned int current_alignment);
+
 /* The type used to store keys for instances of type struct
 * AnotherSimple.
 *
@@ -508,5 +594,5 @@ VtkImagePlugin_delete(struct PRESTypePlugin *);
 #define NDDSUSERDllExport
 #endif
 
-#endif /* imagePlugin_879297079_h */
+#endif /* imagePlugin_879297137_h */
 

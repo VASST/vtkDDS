@@ -9,8 +9,8 @@ For more information, type 'rtiddsgen -help' at a command shell
 or consult the RTI Connext manual.
 */
 
-#ifndef image_879297079_hpp
-#define image_879297079_hpp
+#ifndef image_879297137_hpp
+#define image_879297137_hpp
 
 #include <iosfwd>
 
@@ -65,6 +65,9 @@ struct Components_t_AliasTag_t {};
 typedef ::rti::core::uint64 Timestamp_t;
 struct Timestamp_t_AliasTag_t {};
 
+typedef uint8_t Bitness_t;
+struct Bitness_t_AliasTag_t {};
+
 #if (defined(RTI_WIN32) || defined (RTI_WINCE)) && defined(NDDS_USER_DLL_EXPORT)
 // On Windows, dll-export template instantiations of standard types used by
 // other dll-exported types
@@ -81,7 +84,8 @@ class NDDSUSERDllExport VtkImage {
         uint32_t Height,
         uint32_t Depth,
         uint8_t Components,
-        const std::vector< uint8_t >& Data);
+        const std::vector< uint8_t >& Data,
+        uint8_t BytesPerComponent);
 
     #ifdef RTI_CXX11_RVALUE_REFERENCES
     #ifndef RTI_CXX11_NO_IMPLICIT_MOVE_OPERATIONS
@@ -167,6 +171,18 @@ class NDDSUSERDllExport VtkImage {
         m_Data_ = value;
     }
 
+    uint8_t& BytesPerComponent() OMG_NOEXCEPT {
+        return m_BytesPerComponent_;
+    }
+
+    const uint8_t& BytesPerComponent() const OMG_NOEXCEPT {
+        return m_BytesPerComponent_;
+    }
+
+    void BytesPerComponent(uint8_t value) {
+        m_BytesPerComponent_ = value;
+    }
+
     bool operator == (const VtkImage& other_) const;
     bool operator != (const VtkImage& other_) const;
 
@@ -180,6 +196,7 @@ class NDDSUSERDllExport VtkImage {
     uint32_t m_Depth_;
     uint8_t m_Components_;
     std::vector< uint8_t > m_Data_;
+    uint8_t m_BytesPerComponent_;
 
 };
 
@@ -266,6 +283,14 @@ namespace rti {
 
         #ifndef NDDS_STANDALONE_TYPE
         template<>
+        struct dynamic_type< Bitness_t_AliasTag_t > {
+            typedef ::dds::core::xtypes::AliasType type;
+            NDDSUSERDllExport static const ::dds::core::xtypes::AliasType& get();
+        };
+        #endif
+
+        #ifndef NDDS_STANDALONE_TYPE
+        template<>
         struct dynamic_type< VtkImage > {
             typedef ::dds::core::xtypes::StructType type;
             NDDSUSERDllExport static const ::dds::core::xtypes::StructType& get();
@@ -288,5 +313,5 @@ namespace rti {
 #define NDDSUSERDllExport
 #endif
 
-#endif // image_879297079_hpp
+#endif // image_879297137_hpp
 

@@ -24,8 +24,10 @@ OTHER DEALINGS IN THE SOFTWARE.
 ********************************************/
 
 // VTK includes
+#include <vtkImageData.h>
 #include <vtkObject.h>
 #include <vtkSetGet.h>
+#include <vtkSmartPointer.h>
 
 // RTI includes
 #include <dds/domain/DomainParticipant.hpp>
@@ -33,10 +35,22 @@ OTHER DEALINGS IN THE SOFTWARE.
 #include <dds/sub/Subscriber.hpp>
 #include <dds/topic/Topic.hpp>
 
+// Export directive
+#include "vtkDDSExport.h"
+
+// STL includes
+#include <deque>
+
 class VtkImage;
 
-class vtkImageSubscriber : public vtkObject
+class vtkDDSExport vtkImageSubscriber : public vtkObject
 {
+public:
+  enum ImageSubscriberEvents
+  {
+    ImageSubscriberEvent_NewImage = 850400
+  };
+
 public:
   vtkImageSubscriber();
   virtual ~vtkImageSubscriber();
@@ -47,16 +61,32 @@ public:
   void SetTopicName(std::string);
   vtkGetMacro(TopicName, std::string);
 
+  vtkSmartPointer<vtkImageData> GetImage(uint64_t timestamp);
+  vtkSmartPointer<vtkImageData> GetLatestImage();
+
 protected:
   uint32_t ProcessData(dds::sub::DataReader<VtkImage>& reader);
 
-protected:
-  dds::domain::DomainParticipant Participant;
-  dds::sub::Subscriber Subscriber;
-  unsigned int DomainId;
-  std::string TopicName;
+  class QueueEntry
+  {
+  public:
+    QueueEntry(uint64_t timestamp, vtkSmartPointer<vtkImageData> image)
+      : Timestamp(timestamp)
+      , ImageData(image)
+    {}
+    uint64_t Timestamp;
+    vtkSmartPointer<vtkImageData> ImageData;
+  };
 
-  dds::topic::Topic<VtkImage> Topic;
-  dds::sub::DataReader<VtkImage> Reader;
-private:
+protected:
+  dds::domain::DomainParticipant            Participant;
+  dds::sub::Subscriber                      Subscriber;
+  dds::core::cond::StatusCondition          StatusCondition;
+  unsigned int                              DomainId;
+  std::string                               TopicName;
+
+  dds::topic::Topic<VtkImage>               Topic;
+  dds::sub::DataReader<VtkImage>            Reader;
+
+  std::deque<QueueEntry>                    ReceivedSamples;
 };

@@ -26,7 +26,8 @@ VtkImage::VtkImage() :
     m_Width_ (0u) ,
     m_Height_ (0u) ,
     m_Depth_ (1) ,
-    m_Components_ (0)  {
+    m_Components_ (0) ,
+    m_BytesPerComponent_ (0)  {
 }   
 
 VtkImage::VtkImage (
@@ -35,14 +36,16 @@ VtkImage::VtkImage (
     uint32_t Height,
     uint32_t Depth,
     uint8_t Components,
-    const std::vector< uint8_t >& Data)
+    const std::vector< uint8_t >& Data,
+    uint8_t BytesPerComponent)
     :
         m_Timestamp_( Timestamp ),
         m_Width_( Width ),
         m_Height_( Height ),
         m_Depth_( Depth ),
         m_Components_( Components ),
-        m_Data_( Data ) {
+        m_Data_( Data ),
+        m_BytesPerComponent_( BytesPerComponent ) {
 }
 
 #ifdef RTI_CXX11_RVALUE_REFERENCES
@@ -58,6 +61,8 @@ m_Depth_ (std::move(other_.m_Depth_))
 m_Components_ (std::move(other_.m_Components_))
 ,
 m_Data_ (std::move(other_.m_Data_))
+,
+m_BytesPerComponent_ (std::move(other_.m_BytesPerComponent_))
 {
 } 
 
@@ -78,6 +83,7 @@ void VtkImage::swap(VtkImage& other_)  OMG_NOEXCEPT
     swap(m_Depth_, other_.m_Depth_);
     swap(m_Components_, other_.m_Components_);
     swap(m_Data_, other_.m_Data_);
+    swap(m_BytesPerComponent_, other_.m_BytesPerComponent_);
 }  
 
 bool VtkImage::operator == (const VtkImage& other_) const {
@@ -99,6 +105,9 @@ bool VtkImage::operator == (const VtkImage& other_) const {
     if (m_Data_ != other_.m_Data_) {
         return false;
     }
+    if (m_BytesPerComponent_ != other_.m_BytesPerComponent_) {
+        return false;
+    }
     return true;
 }
 bool VtkImage::operator != (const VtkImage& other_) const {
@@ -114,7 +123,8 @@ std::ostream& operator << (std::ostream& o,const VtkImage& sample)
     o << "Height: " << sample.Height()<<", ";
     o << "Depth: " << sample.Depth()<<", ";
     o << "Components: <" << std::hex<<(int)sample.Components() <<", ";
-    o << "Data: " << sample.Data() ;
+    o << "Data: " << sample.Data()<<", ";
+    o << "BytesPerComponent: <" << std::hex<<(int)sample.BytesPerComponent()  ;
     o <<"]";
     return o;
 }
@@ -514,6 +524,135 @@ namespace rti {
         #ifndef NDDS_STANDALONE_TYPE
 
         template<>
+        struct native_type_code< Bitness_t_AliasTag_t > {
+            static DDS_TypeCode * get()
+            {
+                using namespace ::rti::topic::interpreter;
+
+                static RTIBool is_initialized = RTI_FALSE;
+
+                static DDS_TypeCode Bitness_t_g_tc =
+                {{
+                        DDS_TK_ALIAS, /* Kind*/
+                        DDS_BOOLEAN_FALSE,/* Is a pointer? */
+                        -1, /* Ignored */
+                        (char *)"Bitness_t", /* Name */
+                        NULL, /* Content type code is assigned later */
+                        0, /* Ignored */
+                        0, /* Ignored */
+                        NULL, /* Ignored */
+                        0, /* Ignored */
+                        NULL, /* Ignored */
+                        DDS_VM_NONE, /* Ignored */
+                        RTICdrTypeCodeAnnotations_INITIALIZER,
+                        DDS_BOOLEAN_TRUE, /* _isCopyable */
+                        NULL, /* _sampleAccessInfo: assigned later */
+                        NULL /* _typePlugin: assigned later */
+                    }}; /* Type code for  Bitness_t */
+
+                if (is_initialized) {
+                    return &Bitness_t_g_tc;
+                }
+
+                Bitness_t_g_tc._data._annotations._allowedDataRepresentationMask = 5;
+
+                Bitness_t_g_tc._data._typeCode =  (RTICdrTypeCode *)&DDS_g_tc_octet;
+
+                /* Initialize the values for member annotations. */
+                Bitness_t_g_tc._data._annotations._defaultValue._d = RTI_XCDR_TK_OCTET;
+                Bitness_t_g_tc._data._annotations._defaultValue._u.octet_value = 0;
+                Bitness_t_g_tc._data._annotations._minValue._d = RTI_XCDR_TK_OCTET;
+                Bitness_t_g_tc._data._annotations._minValue._u.octet_value = RTIXCdrOctet_MIN;
+                Bitness_t_g_tc._data._annotations._maxValue._d = RTI_XCDR_TK_OCTET;
+                Bitness_t_g_tc._data._annotations._maxValue._u.octet_value = RTIXCdrOctet_MAX;
+
+                Bitness_t_g_tc._data._sampleAccessInfo = sample_access_info();
+                Bitness_t_g_tc._data._typePlugin = type_plugin_info();    
+
+                is_initialized = RTI_TRUE;
+
+                return &Bitness_t_g_tc;
+            }
+
+            static RTIXCdrSampleAccessInfo * sample_access_info()
+            {
+                static RTIBool is_initialized = RTI_FALSE;
+
+                static RTIXCdrMemberAccessInfo Bitness_t_g_memberAccessInfos[1] =
+                {RTIXCdrMemberAccessInfo_INITIALIZER};
+
+                static RTIXCdrSampleAccessInfo Bitness_t_g_sampleAccessInfo = 
+                RTIXCdrSampleAccessInfo_INITIALIZER;
+
+                if (is_initialized) {
+                    return (RTIXCdrSampleAccessInfo*) &Bitness_t_g_sampleAccessInfo;
+                }
+
+                Bitness_t_g_memberAccessInfos[0].bindingMemberValueOffset[0] = 0;
+
+                Bitness_t_g_sampleAccessInfo.memberAccessInfos = 
+                Bitness_t_g_memberAccessInfos;
+
+                {
+                    size_t candidateTypeSize = sizeof(Bitness_t);
+
+                    if (candidateTypeSize > RTIXCdrUnsignedLong_MAX) {
+                        Bitness_t_g_sampleAccessInfo.typeSize[0] =
+                        RTIXCdrUnsignedLong_MAX;
+                    } else {
+                        Bitness_t_g_sampleAccessInfo.typeSize[0] =
+                        (RTIXCdrUnsignedLong) candidateTypeSize;
+                    }
+                }
+
+                Bitness_t_g_sampleAccessInfo.useGetMemberValueOnlyWithRef =
+                RTI_XCDR_TRUE;
+
+                Bitness_t_g_sampleAccessInfo.getMemberValuePointerFcn = 
+                interpreter::get_aggregation_value_pointer< Bitness_t >;
+
+                Bitness_t_g_sampleAccessInfo.languageBinding = 
+                RTI_XCDR_TYPE_BINDING_CPP_11_STL ;
+
+                is_initialized = RTI_TRUE;
+                return (RTIXCdrSampleAccessInfo*) &Bitness_t_g_sampleAccessInfo;
+            }
+
+            static RTIXCdrTypePlugin * type_plugin_info()
+            {
+                static RTIXCdrTypePlugin Bitness_t_g_typePlugin = 
+                {
+                    NULL, /* serialize */
+                    NULL, /* serialize_key */
+                    NULL, /* deserialize_sample */
+                    NULL, /* deserialize_key_sample */
+                    NULL, /* skip */
+                    NULL, /* get_serialized_sample_size */
+                    NULL, /* get_serialized_sample_max_size_ex */
+                    NULL, /* get_serialized_key_max_size_ex */
+                    NULL, /* get_serialized_sample_min_size */
+                    NULL, /* serialized_sample_to_key */
+                    NULL,
+                    NULL,
+                    NULL,
+                    NULL
+                };
+
+                return &Bitness_t_g_typePlugin;
+            }
+        }; // native_type_code
+        #endif
+
+        const ::dds::core::xtypes::AliasType& dynamic_type< Bitness_t_AliasTag_t >::get()
+        {
+            return static_cast<const ::dds::core::xtypes::AliasType&>(
+                ::rti::core::native_conversions::cast_from_native< ::dds::core::xtypes::DynamicType >(
+                    *(native_type_code< Bitness_t_AliasTag_t >::get())));
+        }
+
+        #ifndef NDDS_STANDALONE_TYPE
+
+        template<>
         struct native_type_code< VtkImage > {
             static DDS_TypeCode * get()
             {
@@ -523,7 +662,7 @@ namespace rti {
 
                 static DDS_TypeCode VtkImage_g_tc_Data_sequence;
 
-                static DDS_TypeCode_Member VtkImage_g_tc_members[6]=
+                static DDS_TypeCode_Member VtkImage_g_tc_members[7]=
                 {
 
                     {
@@ -633,6 +772,24 @@ namespace rti {
                         1,
                         NULL, /* Ignored */
                         RTICdrTypeCodeAnnotations_INITIALIZER
+                    }, 
+                    {
+                        (char *)"BytesPerComponent",/* Member name */
+                        {
+                            6,/* Representation ID */
+                            DDS_BOOLEAN_FALSE,/* Is a pointer? */
+                            -1, /* Bitfield bits */
+                            NULL/* Member type code is assigned later */
+                        },
+                        0, /* Ignored */
+                        0, /* Ignored */
+                        0, /* Ignored */
+                        NULL, /* Ignored */
+                        RTI_CDR_REQUIRED_MEMBER, /* Is a key? */
+                        DDS_PUBLIC_MEMBER,/* Member visibility */
+                        1,
+                        NULL, /* Ignored */
+                        RTICdrTypeCodeAnnotations_INITIALIZER
                     }
                 };
 
@@ -646,7 +803,7 @@ namespace rti {
                         0, /* Ignored */
                         0, /* Ignored */
                         NULL, /* Ignored */
-                        6, /* Number of members */
+                        7, /* Number of members */
                         VtkImage_g_tc_members, /* Members */
                         DDS_VM_NONE, /* Ignored */
                         RTICdrTypeCodeAnnotations_INITIALIZER,
@@ -670,6 +827,7 @@ namespace rti {
                 VtkImage_g_tc_members[3]._representation._typeCode = (RTICdrTypeCode *)&::rti::topic::dynamic_type< Dimension_t_AliasTag_t>::get().native();
                 VtkImage_g_tc_members[4]._representation._typeCode = (RTICdrTypeCode *)&::rti::topic::dynamic_type< Components_t_AliasTag_t>::get().native();
                 VtkImage_g_tc_members[5]._representation._typeCode = (RTICdrTypeCode *)& VtkImage_g_tc_Data_sequence;
+                VtkImage_g_tc_members[6]._representation._typeCode = (RTICdrTypeCode *)&::rti::topic::dynamic_type< Bitness_t_AliasTag_t>::get().native();
 
                 /* Initialize the values for member annotations. */
                 VtkImage_g_tc_members[0]._annotations._defaultValue._d = RTI_XCDR_TK_ULONGLONG;
@@ -707,6 +865,13 @@ namespace rti {
                 VtkImage_g_tc_members[4]._annotations._maxValue._d = RTI_XCDR_TK_OCTET;
                 VtkImage_g_tc_members[4]._annotations._maxValue._u.octet_value = RTIXCdrOctet_MAX;
 
+                VtkImage_g_tc_members[6]._annotations._defaultValue._d = RTI_XCDR_TK_OCTET;
+                VtkImage_g_tc_members[6]._annotations._defaultValue._u.octet_value = 0;
+                VtkImage_g_tc_members[6]._annotations._minValue._d = RTI_XCDR_TK_OCTET;
+                VtkImage_g_tc_members[6]._annotations._minValue._u.octet_value = RTIXCdrOctet_MIN;
+                VtkImage_g_tc_members[6]._annotations._maxValue._d = RTI_XCDR_TK_OCTET;
+                VtkImage_g_tc_members[6]._annotations._maxValue._u.octet_value = RTIXCdrOctet_MAX;
+
                 VtkImage_g_tc._data._sampleAccessInfo = sample_access_info();
                 VtkImage_g_tc._data._typePlugin = type_plugin_info();    
 
@@ -721,7 +886,7 @@ namespace rti {
 
                 VtkImage *sample;
 
-                static RTIXCdrMemberAccessInfo VtkImage_g_memberAccessInfos[6] =
+                static RTIXCdrMemberAccessInfo VtkImage_g_memberAccessInfos[7] =
                 {RTIXCdrMemberAccessInfo_INITIALIZER};
 
                 static RTIXCdrSampleAccessInfo VtkImage_g_sampleAccessInfo = 
@@ -755,6 +920,9 @@ namespace rti {
 
                 VtkImage_g_memberAccessInfos[5].bindingMemberValueOffset[0] = 
                 (RTIXCdrUnsignedLong) ((char *)&sample->Data() - (char *)sample);
+
+                VtkImage_g_memberAccessInfos[6].bindingMemberValueOffset[0] = 
+                (RTIXCdrUnsignedLong) ((char *)&sample->BytesPerComponent() - (char *)sample);
 
                 VtkImage_g_sampleAccessInfo.memberAccessInfos = 
                 VtkImage_g_memberAccessInfos;
@@ -884,6 +1052,7 @@ namespace dds {
             sample.Depth(1);
             sample.Components(0);
             ::rti::topic::reset_sample(sample.Data());
+            sample.BytesPerComponent(0);
         }
 
         void topic_type_support< VtkImage >::allocate_sample(VtkImage& sample, int, int) 

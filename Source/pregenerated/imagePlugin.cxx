@@ -501,6 +501,152 @@ Timestamp_tPlugin_get_serialized_key_max_size_for_keyhash(
 * ------------------------------------------------------------------------ */
 
 /* ----------------------------------------------------------------------------
+*  Type Bitness_t
+* -------------------------------------------------------------------------- */
+
+/* -----------------------------------------------------------------------------
+Support functions:
+* -------------------------------------------------------------------------- */
+
+Bitness_t *
+Bitness_tPluginSupport_create_data(void)
+{
+    try {
+        Bitness_t *sample = new Bitness_t;    
+        ::rti::topic::allocate_sample(*sample);
+        return sample;
+    } catch (...) {
+        return NULL;
+    }
+}
+
+void 
+Bitness_tPluginSupport_destroy_data(
+    Bitness_t *sample) 
+{
+    delete sample;
+}
+
+RTIBool 
+Bitness_tPluginSupport_copy_data(
+    Bitness_t *dst,
+    const Bitness_t *src)
+{
+    try {
+        *dst = *src;
+    } catch (...) {
+        return RTI_FALSE;
+    }
+
+    return RTI_TRUE;
+}
+
+/* ----------------------------------------------------------------------------
+Callback functions:
+* ---------------------------------------------------------------------------- */
+
+RTIBool 
+Bitness_tPlugin_copy_sample(
+    PRESTypePluginEndpointData,
+    Bitness_t *dst,
+    const Bitness_t *src)
+{
+    return Bitness_tPluginSupport_copy_data(dst,src);
+}
+
+/* ----------------------------------------------------------------------------
+(De)Serialize functions:
+* ------------------------------------------------------------------------- */
+unsigned int 
+Bitness_tPlugin_get_serialized_sample_max_size(
+    PRESTypePluginEndpointData endpoint_data,
+    RTIBool include_encapsulation,
+    RTIEncapsulationId encapsulation_id,
+    unsigned int current_alignment);
+
+unsigned int 
+Bitness_tPlugin_get_serialized_sample_max_size(
+    PRESTypePluginEndpointData endpoint_data,
+    RTIBool include_encapsulation,
+    RTIEncapsulationId encapsulation_id,
+    unsigned int current_alignment)
+{
+    try {
+        unsigned int size;
+        RTIBool overflow = RTI_FALSE;
+
+        size = PRESTypePlugin_interpretedGetSerializedSampleMaxSize(
+            endpoint_data,&overflow,include_encapsulation,encapsulation_id,current_alignment);
+
+        if (overflow) {
+            size = RTI_CDR_MAX_SERIALIZED_SIZE;
+        }
+
+        return size;
+    } catch (...) {
+        return 0;
+    }    
+}
+
+/* --------------------------------------------------------------------------------------
+Key Management functions:
+* -------------------------------------------------------------------------------------- */
+
+PRESTypePluginKeyKind 
+Bitness_tPlugin_get_key_kind(void)
+{
+    return PRES_TYPEPLUGIN_NO_KEY;
+}
+
+unsigned int
+Bitness_tPlugin_get_serialized_key_max_size(
+    PRESTypePluginEndpointData endpoint_data,
+    RTIBool include_encapsulation,
+    RTIEncapsulationId encapsulation_id,
+    unsigned int current_alignment)
+{
+    try {
+        unsigned int size;
+        RTIBool overflow = RTI_FALSE;
+
+        size = PRESTypePlugin_interpretedGetSerializedKeyMaxSize(
+            endpoint_data,&overflow,include_encapsulation,encapsulation_id,current_alignment);
+        if (overflow) {
+            size = RTI_CDR_MAX_SERIALIZED_SIZE;
+        }
+
+        return size;
+    } catch (...) {
+        return RTI_FALSE;
+    }    
+}
+
+unsigned int
+Bitness_tPlugin_get_serialized_key_max_size_for_keyhash(
+    PRESTypePluginEndpointData endpoint_data,
+    RTIEncapsulationId encapsulation_id,
+    unsigned int current_alignment)
+{
+    unsigned int size;
+    RTIBool overflow = RTI_FALSE;
+
+    size = PRESTypePlugin_interpretedGetSerializedKeyMaxSizeForKeyhash(
+        endpoint_data,
+        &overflow,
+        encapsulation_id,
+        current_alignment);
+    if (overflow) {
+        size = RTI_CDR_MAX_SERIALIZED_SIZE;
+    }
+
+    return size;
+}
+
+/* ------------------------------------------------------------------------
+* Plug-in Installation Methods
+* ------------------------------------------------------------------------ */
+
+/* ----------------------------------------------------------------------------
 *  Type VtkImage
 * -------------------------------------------------------------------------- */
 

@@ -40,6 +40,10 @@ OTHER DEALINGS IN THE SOFTWARE.
 // Topic includes
 #include "image.hpp"
 
+namespace
+{
+  const uint32_t MAX_SAMPLE_QUEUE_SIZE = 256;
+}
 /*
   // Obtain the DataReader's Status Condition
   dds::core::cond::StatusCondition status_condition(reader);
@@ -80,7 +84,7 @@ vtkImageSubscriber::vtkImageSubscriber()
   , Topic(Participant, "VtkImage")
   , Reader(Subscriber, Topic)
 {
-
+  
 }
 
 //----------------------------------------------------------------------------
@@ -105,9 +109,33 @@ void vtkImageSubscriber::SetTopicName(std::string topicName)
 }
 
 //----------------------------------------------------------------------------
-uint32_t ProcessData(dds::sub::DataReader<VtkImage>& reader)
+vtkSmartPointer<vtkImageData> vtkImageSubscriber::GetImage(uint64_t timestamp)
 {
-  // Take all samples.  Samples are loaned to application, loan is returned when LoanedSamples destructor called.
+  auto iter = std::find_if(this->ReceivedSamples.begin(), this->ReceivedSamples.end(),
+    [timestamp](const QueueEntry& m) -> bool { return m.Timestamp == timestamp; });
+  if (iter != this->ReceivedSamples.end())
+  {
+    return iter->ImageData;
+  }
+
+  return nullptr;
+}
+
+//----------------------------------------------------------------------------
+vtkSmartPointer<vtkImageData> vtkImageSubscriber::GetLatestImage()
+{
+  if (this->ReceivedSamples.size() > 0)
+  {
+    return this->ReceivedSamples.back().ImageData;
+  }
+
+  return nullptr;
+}
+
+//----------------------------------------------------------------------------
+uint32_t vtkImageSubscriber::ProcessData(dds::sub::DataReader<VtkImage>& reader)
+{
+  // Take all samples. Samples are loaned to application, loan is returned when LoanedSamples destructor called.
   unsigned int samples_read = 0;
   dds::sub::LoanedSamples<VtkImage> samples = reader.take();
   for (const auto& sample : samples)
@@ -115,7 +143,34 @@ uint32_t ProcessData(dds::sub::DataReader<VtkImage>& reader)
     if (sample.info().valid())
     {
       samples_read++;
+      auto newImage = vtkSmartPointer<vtkImageData>::New();
+      newImage->SetDimensions(sample.data().Width(), sample.data().Height(), sample.data().Depth());
+      uint8_t dataType;
+      switch (sample.data().BytesPerComponent())
+      {
+      case 2:
+        dataType = VTK_UNSIGNED_SHORT;
+        break;
+      case 4:
+        dataType = VTK_UNSIGNED_INT;
+        break;
+      default:
+      case 1:
+        dataType = VTK_UNSIGNED_CHAR;
+        break;
+      }
+      newImage->AllocateScalars(dataType, sample.data().Components());
+      void* imageBytes = newImage->GetScalarPointer();
+      auto dataSize = sample.data().Width() * sample.data().Height() * sample.data().Depth() * sample.data().Components() * sample.data().BytesPerComponent();
+      memcpy(imageBytes, (void*)sample.data().Data().data(), dataSize);
+      
       // Image received, throw it into queue and fire an event
+      this->ReceivedSamples.push_back(vtkImageSubscriber::QueueEntry(sample.data().Timestamp(), newImage));
+      if (this->ReceivedSamples.size() > MAX_SAMPLE_QUEUE_SIZE)
+      {
+        this->ReceivedSamples.pop_front();
+      }
+      this->InvokeEvent(ImageSubscriberEvent_NewImage, (void*)&this->ReceivedSamples.back().Timestamp);
     }
   }
 
