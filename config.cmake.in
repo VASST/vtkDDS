@@ -1,0 +1,24 @@
+#-----------------------------------------------------------------------------
+#
+# vtkDDSConfig.cmake - vtkDDS CMake configuration file for external projects.
+#
+
+set(vtkDDS_USE_RTI @VTKDDS_USE_RTI@)
+set(vtkDDS_USE_OPENDDS @VTKDDS_USE_OPENDDS@)
+
+set(CMAKE_MODULE_PATH
+  ${CMAKE_CURRENT_LIST_DIR}/Modules
+  ${CMAKE_MODULE_PATH}
+  )
+
+if(@VTKDDS_USE_RTI@)
+  if(@VTKDDS_RTI_STATIC@)
+    set(NDDSSTATIC ON)
+  endif()
+  find_package(Connext)
+elseif(@VTKDDS_USE_OPENDDS@)
+
+endif()
+
+include("vtkDDSTargets.cmake")
+include("vtkDDSConfigVersion.cmake")

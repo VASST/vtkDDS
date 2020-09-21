@@ -41,6 +41,7 @@ OTHER DEALINGS IN THE SOFTWARE.
 #include "vtkDDSExport.h"
 
 // STL includes
+#include <atomic>
 #include <deque>
 
 class VtkImage;
@@ -67,6 +68,7 @@ public:
   vtkSmartPointer<vtkImageData> GetLatestImage();
 
 protected:
+  bool CreateAndStartAsync(uint32_t threadPoolSize);
   uint32_t ProcessData();
 
   class QueueEntry
@@ -87,6 +89,7 @@ protected:
   rti::core::cond::AsyncWaitSet             WaitSetAsync;
   unsigned int                              DomainId;
   std::string                               TopicName;
+  std::atomic_bool                          Started;
 
   dds::topic::Topic<VtkImage>               Topic;
   dds::sub::DataReader<VtkImage>            Reader;

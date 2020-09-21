@@ -44,37 +44,6 @@ namespace
 {
   const uint32_t MAX_SAMPLE_QUEUE_SIZE = 256;
 }
-/*
-  // Obtain the DataReader's Status Condition
-  dds::core::cond::StatusCondition status_condition(reader);
-
-  // Enable the 'data available' status.
-  status_condition.enabled_statuses(
-    dds::core::status::StatusMask::data_available());
-
-  // Associate a handler with the status condition. This will run when the
-  // condition is triggered, in the context of the dispatch call (see below)
-  unsigned int samples_read = 0;
-  status_condition.extensions().handler([&reader, &samples_read]()
-  {
-    samples_read += process_data(reader);
-  });
-
-  // Create a WaitSet and attach the StatusCondition
-  dds::core::cond::WaitSet waitset;
-  waitset += status_condition;
-
-  while (true)
-  {
-    // Dispatch will call the handlers associated to the WaitSet conditions
-    // when they activate
-    std::cout << "HelloWorld subscriber sleeping for 4 sec..."
-              << std::endl;
-
-    waitset.dispatch(dds::core::Duration(4));  // Wait up to 4s each time
-  }
-}
-*/
 
 //----------------------------------------------------------------------------
 vtkImageSubscriber::vtkImageSubscriber(uint32_t threadPoolSize)
@@ -85,24 +54,9 @@ vtkImageSubscriber::vtkImageSubscriber(uint32_t threadPoolSize)
   , Reader(Subscriber, Topic)
   , StatusCondition(Reader)
   , WaitSetAsync()
+  , Started(false)
 {
-  try
-  {
-    rti::core::cond::AsyncWaitSet async_waitset(rti::core::cond::AsyncWaitSetProperty().thread_pool_size(threadPoolSize));
-    StatusCondition.enabled_statuses(dds::core::status::StatusMask::data_available());
-    StatusCondition->handler([this]()
-    {
-      this->ProcessData();
-    });
-    WaitSetAsync.attach_condition(StatusCondition);
 
-    async_waitset.start();
-  }
-  catch (const std::exception& ex)
-  {
-    // This will catch DDS exceptions
-    vtkErrorMacro("Unable to start async waitset: " << ex.what());
-  }
 }
 
 //----------------------------------------------------------------------------
@@ -148,6 +102,38 @@ vtkSmartPointer<vtkImageData> vtkImageSubscriber::GetLatestImage()
   }
 
   return nullptr;
+}
+
+//----------------------------------------------------------------------------
+bool vtkImageSubscriber::CreateAndStartAsync(uint32_t threadPoolSize)
+{
+  if (Started)
+  {
+    return true;
+  }
+
+  try
+  {
+    rti::core::cond::AsyncWaitSet async_waitset(rti::core::cond::AsyncWaitSetProperty().thread_pool_size(threadPoolSize));
+    StatusCondition.enabled_statuses(dds::core::status::StatusMask::data_available());
+    StatusCondition->handler([this]()
+    {
+      this->ProcessData();
+    });
+    WaitSetAsync.attach_condition(StatusCondition);
+
+    async_waitset.start();
+
+    Started = true;
+    return true;
+  }
+  catch (const std::exception& ex)
+  {
+    // This will catch DDS exceptions
+    vtkErrorMacro("Unable to start async waitset: " << ex.what());
+
+    return false;
+  }
 }
 
 //----------------------------------------------------------------------------

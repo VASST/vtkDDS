@@ -27,7 +27,7 @@ OTHER DEALINGS IN THE SOFTWARE.
 #define __@PROJECT_NAME@Export_h
 
 #if defined(WIN32) && !defined(@PROJECT_NAME@_STATIC)
- #if defined(@_lib@_EXPORTS)
+ #if defined(@PROJECT_NAME@_EXPORTS)
   #define @PROJECT_NAME@Export __declspec( dllexport )
  #else
   #define @PROJECT_NAME@Export __declspec( dllimport )
